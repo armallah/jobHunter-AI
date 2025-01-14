@@ -16,6 +16,9 @@ class CVProfile:
     secondary_discipline: str = ""  # e.g. "Retail", "Support Engineer"
     grade: str = ""  # e.g What grade at University (i.e 2:1, 1st class, 70% etc.) Do not include the tpye of degree
     school: str = ""  # e.g. Which university did they attend, choose highest qualification university if there are more than one, if none put highest level of education
+    qual: str = ""
+    experience: str = ""
+    skills: str = ""
     s_info: str = (
         ""  # e.g. Important information that may be needed when looking for jobs
     )

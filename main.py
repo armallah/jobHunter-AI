@@ -3,7 +3,7 @@ import logging
 from config import LOG_LEVEL
 from services.pdf_extractor import PDFExtractor
 from services.text_processor import SentenceProcessor, Processor, SectionProcessor
-from conversation_interface import ConversationInterface
+from conversation_interface import CVProfileFiller
 from models.cv_profile import CVProfile
 
 
@@ -35,15 +35,21 @@ def main():
     # 2. Process text
     # processor = SentenceProcessor()
     processor = SectionProcessor()
-    sentences = processor.tokenise(text)
-    logger.info(f"Number of sections extracted: {len(sentences)}")
+    sections = processor.tokenise(text)
+    logger.info(f"Number of sections extracted: {len(sections)}")
 
-    # Print sections with their content
-    for idx, sentence in enumerate(sentences, 1):
-        print(f"Section {idx}:")
-        for key, value in sentence.items():
-            print(f"{key}: {value}")
-        print("-" * 50)
+    # 2) Pass sections to LLM to fill CVProfile
+    filler = CVProfileFiller()
+    cv_profile: CVProfile = filler.fill_cv_profile(sections)
+
+    print("CV PROFILE FIELDS:")
+    print(cv_profile)
+    # # Print sections with their content
+    # for idx, sentence in enumerate(sentences, 1):
+    #     print(f"Section {idx}:")
+    #     for key, value in sentence.items():
+    #         print(f"{key}: {value}")
+    #     print("-" * 50)
 
     # 3. Example usage of system-user approach
     # conversation = ConversationInterface(
