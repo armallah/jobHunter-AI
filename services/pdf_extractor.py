@@ -7,12 +7,13 @@ logger = logging.getLogger(__name__)
 
 class PDFExtractor:
     def __init__(self, pdf_path: str):
+        # initialize the PDF path
         self.pdf_path = pdf_path
         self._pdf_reader: Optional[PdfReader] = None
 
     def load_pdf(self) -> None:
+        # load the pdf file from path
         try:
-            # with open(self.pdf_path, "rb") as f:
             self._pdf_reader = PdfReader(self.pdf_path)
             logger.info(f"Successfully loaded PDF: {self.pdf_path}")
         except FileNotFoundError:
@@ -23,6 +24,7 @@ class PDFExtractor:
             raise
 
     def extract_metadata(self) -> Dict[str, Any]:
+        # extract metadata from the pdf that will be printed to user on console, may contain useful information for minimal computational cost
         if not self._pdf_reader:
             raise ValueError("PDF must be loaded before extracting metadata.")
 
@@ -39,6 +41,7 @@ class PDFExtractor:
         }
 
     def extract_text(self) -> str:
+        # extract text from the pdf file with parsing from PdfReader class
         if not self._pdf_reader:
             raise ValueError("PDF must be loaded before extracting text.")
 
