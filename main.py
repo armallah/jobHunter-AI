@@ -35,17 +35,14 @@ def main() -> None:
     cv_profile = filler.fill_cv_profile(sections)
     print(cv_profile)
 
-    scraper = LinkedInJobScraper(cv_profile, "armallah19782@gmail.com", "pass", headless=False)
+
+    username = input("Enter your LinkedIn username: ")
+    password = getpass.getpass("Enter your LinkedIn password: ")
+
+    scraper = LinkedInJobScraper(cv_profile, username, password, headless=False)
+    
+    # scraper = LinkedInJobScraper(cv_profile, "", headless=False)
     scraper.run()
 
 if __name__ == "__main__":
     main()
-
-"""
-Possible next steps:
-1. Add argument parsing for username/password or store them in a safe config.
-2. Expand error handling for PDF extraction or scraping steps.
-3. Integrate with a database or logging system for better reporting.
-
-c
-"""
