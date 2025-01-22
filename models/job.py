@@ -1,22 +1,18 @@
 from dataclasses import dataclass
 
-
 @dataclass
 class Job:
+    match: bool = False
     role: str = ""
     company: str = ""
-    location: str = ""
-    link: str = ""
-    apply_method: str = ""
+    location: str = ""    
     description: str = ""
-    summarize_job_description: str = ""
-    recruiter_link: str = ""
-    resume_path: str = ""
-    cover_letter_path: str = ""
+    link: str = ""
+
 
     def formatted_job_information(self) -> str:
         """
-        Formats the job information as markdown
+        formats the job information as markdown
         """
 
         return f"""
