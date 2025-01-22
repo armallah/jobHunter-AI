@@ -1,4 +1,4 @@
-# LinkedIn Job Hinter
+# LinkedIn Job Hunter
 
 This repository contains a pipeline for parsing a candidate's CV (from a PDF) and then using it to scrape and match LinkedIn job listings. **Important**: This project is still unfinished, and many features are subject to change in future updates.
 
