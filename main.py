@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import getpass
 import sys
 import logging
 
@@ -41,7 +42,6 @@ def main() -> None:
 
     scraper = LinkedInJobScraper(cv_profile, username, password, headless=False)
     
-    # scraper = LinkedInJobScraper(cv_profile, "", headless=False)
     scraper.run()
 
 if __name__ == "__main__":
