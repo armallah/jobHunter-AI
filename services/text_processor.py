@@ -5,17 +5,20 @@ from typing import List
 from abc import ABC, abstractmethod
 import re
 
-from regex import B
+from rapidfuzz import fuzz
+
 
 logger = logging.getLogger(__name__)
 
 
 class Processor(ABC):
+    #abstract class for processing text
     @abstractmethod
     def tokenise(self):
         pass
 
 
+#sentence processor class that parses pdf text into sentences with nltk, rather useless but may still have unseen perks for later
 class SentenceProcessor(Processor):
     def __init__(self):
         nltk.download("punkt")
@@ -27,14 +30,11 @@ class SentenceProcessor(Processor):
         return sentences
 
 
-from rapidfuzz import fuzz
 
-
+#section processor class that tokenises text based off keywords, since I only want to make one LLM call before running agent
 class SectionProcessor(Processor):
-    """
-    Tokenises based off keywords, since I only want to make once LLM call before running agent
-    """
 
+    #keywords to parse from, not exhaustive but should be enough for most cases especially with the fuzzy matching
     SEC_HEADINGS = [
         r"EDUCATION",
         r"EXPERIENCE",
@@ -71,27 +71,31 @@ class SectionProcessor(Processor):
         r"Achievements",
     ]
 
+    #regex pattern to match any of the keywords with OR | operator
     heading_pattern = r"(" + r"|".join(SEC_HEADINGS) + r")"
 
     def __init__(self):
-        logger.debug("NLTK punkt tokenizer downloaded (if not already).")
+        logger.debug("SectionProcessor initialised.")
 
     def tokenise(self, text: str) -> List[dict]:
         # self._extract_heading_cadidates omitted due to inconsistency when used aganist a diverse range of CVs
         # heading_candidates = self._extract_heading_candidates(text)
+        
+        #etxtract known headings from regex
+        #then known duplicate headings are removed
         headings_from_regex = self._extract_known_headings(text)
-
-        # intersect_headings = set(heading_candidates).intersection(
-        #     set(headings_from_regex)
-        # )
-
         known_headings = set(headings_from_regex)
 
+        #using known headings to split the text into sections
         sections = self._split_by_headings(text, known_headings)
 
+        #return section for llm processing
         return sections
 
+    #not used due to inconsistency
     def _extract_heading_candidates(self, text: str) -> List[str]:
+        #split the text into tokens, these tokens are split based on guesswork on the number of spaces between them
+        #this avoids splitting on text that is not a heading since headings are usually separated by a large number of spaces or \n
         tokens = re.split(r"\s{2,}", text)
 
         recognised_headings = []
@@ -103,6 +107,7 @@ class SectionProcessor(Processor):
                 continue
 
             for heading in self.SEC_HEADINGS:
+                #fuzzy matching to see if the token is similar to the heading
                 score = fuzz.partial_ratio(san_token.lower(), heading.lower())
 
                 if score > 80:
@@ -112,16 +117,14 @@ class SectionProcessor(Processor):
         return list(set(recognised_headings))
 
     def _extract_known_headings(self, text: str) -> List[str]:
+        # Find all headings in the text using the regex pattern
         matches = re.findall(self.heading_pattern, text, flags=re.IGNORECASE)
         normalise_matches = [m.upper() for m in matches]
 
         return list(set(normalise_matches))
 
     def _split_by_headings(self, text: str, headings: set) -> List[dict]:
-        """
-        Splits the text by the given set of headings (intersection).
-        If headings is empty, returns the entire text as a single section.
-        """
+        # We split the text by the given set of headings (intersection).
         if not headings:
             return [{"heading": "MISC", "content": text.strip()}]
 
@@ -197,11 +200,7 @@ class SectionProcessor(Processor):
         return final_sections
 
     def _is_line_fuzzy_heading_candidate(self, line: str, headings: set) -> bool:
-        """
-        If you want a fallback fuzzy match for lines that are near a heading
-        but not exactly spelled the same.
-        This ensures the line does not contain extra words or punctuation.
-        """
+        # Fallback fuzzy match for lines that are near a heading but not exactly spelled the same.
         words = line.split()
         # If it's too long, let's assume it's not a heading
         if len(words) > 5:
